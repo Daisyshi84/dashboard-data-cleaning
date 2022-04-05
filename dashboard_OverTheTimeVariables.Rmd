@@ -1,0 +1,121 @@
+---
+title: "Over The Time Variables For Dashboard"
+author: "Daisy Shi"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+```{r, output=TRUE,echo=FALSE, warning=FALSE,message=FALSE}
+library(fs)
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(gtsummary)
+library(gmodels)
+library(writexl)
+library(readxl)
+library(openxlsx)
+ 
+data<-read_excel("\\\\cdc.gov\\locker\\CPR_RMOI\\Response Activities\\2019 nCoV\\Evaluation Team\\Dashboard\\Data Output\\main_data_dashboard_MostUpdated.xlsx")
+
+
+summ<- function(var){
+  var1<-  data %>% 
+  filter(main_module_complete==2)%>%
+  select(var,CompMonth,main_module_complete)%>%
+  pivot_longer(var)%>%
+  group_by(name,value,CompMonth)%>%
+  count(name,value)%>%
+   pivot_wider(names_from = value,values_from = n)%>%
+   arrange(desc(Checked))%>%
+   rename(variable=name)%>%
+   mutate(Month=case_when(
+    str_detect(CompMonth,pattern ='1')~'January',
+    str_detect(CompMonth,pattern ='2')~'February',
+    str_detect(CompMonth,pattern ='3')~'March',
+    str_detect(CompMonth,pattern ='4')~'April',
+    str_detect(CompMonth,pattern ='5')~'May',
+    str_detect(CompMonth,pattern ='6')~'June',
+    str_detect(CompMonth,pattern ='7')~'July',
+    str_detect(CompMonth,pattern ='8')~'August',
+    str_detect(CompMonth,pattern ='9')~'September',
+    str_detect(CompMonth,pattern ='10')~'October',
+    str_detect(CompMonth,pattern ='11')~'November',
+    str_detect(CompMonth,pattern ='12')~'December')
+    )
+
+  return(var1) 
+}
+  
+#ossam variables
+unsafe<- c(paste0('unsafe___',1:4),'unsafe___9')
+unsafe.factor<- paste0(unsafe,'.factor')
+incident<-c(paste0('incident___',1:4),'incident___9')
+incident.factor<- paste0(incident,'.factor')
+incidentreport<-paste0('incidentreport___',1:8)
+incidentreport.factor<- paste0(incidentreport,'.factor')
+breaks_why<-paste0('breaks_why___',1:7)
+breaks_why.factor<- paste0(breaks_why,'.factor')
+poc_during<-c(paste0('poc_during___',1:6),'poc_during___9')
+poc_during.factor<- paste0(poc_during,'.factor')
+adminleave<-paste0('adminleave___',1:10)
+adminleave.factor<- paste0(adminleave,'.factor')
+barrier<-paste0('barrier___',1:11)
+barrier.factor<- paste0(barrier,'.factor')
+
+
+#rss variables
+source.factor<- c(paste0('source___',1:10,'.factor'))
+whyvolunteer<- paste0('whyvolunteer___',1:15)
+whyvolunteer.factor<- paste0(whyvolunteer,'.factor')
+
+
+#'0ss1m_02' ,'adminleave_why` doesn't exist
+ossam<-c('CompMonth','ReturnMonth','SentMonth','DepLength','comm03','ohs02','ohs02.factor','ohs03','ra01','ra01.factor',	 'ra02',	 'ra03',	 'predepinfo_eoc',	 'predepinfo_field','workhour','workload',	 'hrs_home','hrs_home.factor',	'pt01','pt01.factor',	 'pt02',	 'pt03',	 'pt04', 'pt05',	 'team02','team02.factor',	 'hlthprep','hlthprep.factor','unsafe_open',	 'exposure',	'exposure.factor', 'incidentaddress',	'incidentaddress.factor', 'stress_overall','stress_overall.factor','stress01.factor',	 'stress01',	 'stress02',	 'stress03',	 'stress04','stress05',	 'stress06',	 'stress07',	 'stress08',	 'healthksa01','healthksa01.factor',	 'healthksa02',	 'healthksa03',	 'healthksa04',	 'healthksa05',	 'healthksa06',	 'healthksa07',	 'ossam01','ossam01.factor','ossam02','ossam02.factor','hlthprep_missing',	 'workhealth',	'workhealth.factor', 'breaks','breaks.factor',	 'breaks_why_other', 'agency01',	'agency01.factor', 'agency02',	 'agency03',	 'agency04', 'appreciated','appreciated.factor', 'adminreject_why',unsafe.factor,unsafe,incident,incident.factor,incidentreport,incidentreport.factor,breaks_why,breaks_why.factor,poc_during,poc_during.factor,adminleave,adminleave.factor,barrier,barrier.factor)
+
+rss<- c('CompMonth','ReturnMonth','SentMonth','DepLength','first_ever','first_ever.factor',	'first_covid','first_covid.factor','first_tf','first_tf.factor',	'approach',	source,	'source_other',	'emercoord',	'timeonresponse',	'extend',whyvolunteer,	whyvolunteer.factor,	'whyvolunteer_other',	'travel_where',	'travel_where.factor',	'travel06','travel06.factor',		'travel05',		'travel05.factor','travel03','travel03.factor',	'travel04','travel04.factor',	'equipserv',	'equip01',	'erf01',	'erf02',	'eq_how',	'eq_rate',	'eq_timely',	'eq_pickup',	'eq_return',	'eq_qul',	'eq_received',	'equip',	'eq_needed',	'eq_requested',	'ppe01',	'ppe02',	'ppe03',	'ppe_issues',	'equip_open',	'notification',	'poc_pre','poc_pre.factor',	'emails01',	'emails02',	'dipl01',	'dipl02',	'dipl03',	'predepinfo_eoc',	'predepinfo_field',	'jobdescr01',	'jobdescr01',	poc_during,	poc_during.factor,'depagain_covid',	barrier,barrier.factor)
+ 
+
+
+
+#source_summary$name[source_summary$name=="source___1.factor"]= "My supervisor"
+#source_summary$name[source_summary$name=="source___2.factor"]= "Emergency Coordinator recommended it"
+#source_summary$name[source_summary$name=="source___3.factor"]= "A taskforce approached me"
+#source_summary$name[source_summary$name=="source___4.factor"]= "From a friend or colleague"
+#source_summary$name[source_summary$name=="source___5.factor"]= "Someone in the EOC or taskforce" 
+#source_summary$name[source_summary$name=="source___6.factor"]= "Official CDC or EOC email soliciting volunteers"
+#source_summary$name[source_summary$name=="source___7.factor"]= "DeployCDC job posting" 
+#source_summary$name[source_summary$name=="source___8.factor"]= "I was name requested"
+#source_summary$name[source_summary$name=="source___9.factor"]= "GRRT surge management"
+#source_summary$name[source_summary$name=="source___10.factor"]= "Other"
+ 
+
+barrier.factor<-summ(barrier.factor)
+incident.factor<-summ(incident.factor)
+unsafe.factor<-summ(unsafe.factor)
+poc_during.factor<-summ(poc_during.factor)
+whyvolunteer.factor<-summ(whyvolunteer.factor)
+source.factor<-summ(source.factor)
+incidentreport.factor<-summ(incidentreport.factor)
+breaks_why.factor<-summ(breaks_why.factor)
+adminleave.factor<-summ(adminleave.factor)
+
+
+
+#define sheet names for each data frame
+dataset_names <- list('barrier.factor' = barrier.factor, 
+                      'incident.factor' = incident.factor, 
+                      'unsafe.factor' = unsafe.factor,
+                      'whyvolunteer.factor' =whyvolunteer.factor,
+                      "source.factor" = source.factor,
+                      "incidentreport.factor"= incidentreport.factor,
+                      "breaks_why.factor"= breaks_why.factor,
+                      "poc_during.factor" = poc_during.factor,
+                      "adminleave.factor"= adminleave.factor)
+
+#export each data frame to separate sheets in same Excel file
+openxlsx::write.xlsx(dataset_names, file = '\\\\cdc.gov\\locker\\CPR_RMOI\\Response Activities\\2019 nCoV\\Evaluation Team\\Dashboard\\OverTheTimeVariables\\OverTheTimeVariables_MostUpdated.xlsx') 
+
+
+ 
+ 
+ 
+```
